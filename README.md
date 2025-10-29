@@ -1,33 +1,31 @@
 # kokoa-books
-Aplicación React para búsqueda y gestión de libros.
+Aplicación React para buscar y explorar libros de manera sencilla.
 
 ## Objetivo
-Aprender a conectar React con una API REST, hacer peticiones HTTP, normalizar datos y mostrar resultados en la UI.
+Aprender a usar React para conectarse a una API, mostrar información y manejar estados como carga o error, mientras se construye una interfaz interactiva.
 
 ## Tecnologías
-- React
-- Vite
-- Axios
-- Postman
+- React  
+- Vite  
+- Axios  
 
-## Big Book API — Search Books
-
-**Endpoint:**  
-GET https://api.bigbookapi.com/search-books
+## Big Book API
+La aplicación se conecta a la **Big Book API** para buscar libros.  
+Se envía una API Key para obtener los datos de forma segura.
 
 **Headers usados:**  
 - Accept: application/json  
 - X-API-Key: dbd6c1ca3f3f4eecb969c4c8fcfd9323
 
-## Normalización de datos
+## Cómo funciona
+- El usuario escribe un término de búsqueda y obtiene resultados en tiempo real.  
+- Cada libro muestra título, autores y portada.  
+- Se manejan mensajes de carga y error.  
 
-La API devuelve cada libro dentro de un array. Usamos `normalizeBook` para transformar cada libro a un formato simple con los campos necesarios:  
-`id`, `title`, `authors` (lista de nombres), `coverUrl` y `rating`.
+## Componentes principales
+- **SearchBar:** barra para escribir y buscar libros.  
+- **BooksPage:** gestiona los resultados y estados.  
+- **BookItem:** muestra la información de cada libro.  
 
-## Consumo de API en React con Axios
-
-- La petición se realiza dentro de `useEffect` al montar el componente.
-- Se manejan estados para carga (`loading`), error (`error`) y datos (`books`).
-- Se envía la API key en el header `X-API-Key` para autenticar la petición.
-- La respuesta se normaliza con `normalizeBook` antes de guardarla en el estado.
-- Los datos se muestran en la UI en formato JSON para facilitar la prueba.
+## Resultado esperado
+Una app funcional y fácil de usar que permite explorar libros de la API directamente desde el navegador.
