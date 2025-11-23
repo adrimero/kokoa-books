@@ -1,95 +1,152 @@
-// Este componente representa una barra de búsqueda simple para libros.
-// Permite al usuario escribir un texto y enviarlo al componente padre
-// cuando presiona el botón o confirma el formulario.
+// src/components/SearchBarLibros.jsx
 
-/**
- * Componente que permite buscar libros mediante un formulario.
- *
- * Recibe:
- * onSearch: Función entregada por el componente padre que recibe el texto ingresado.
- *
- * Internamente maneja:
- * query: Texto actual escrito por el usuario.
- *
- * Cuando el formulario se envía:
- * - Se evita que la página recargue.
- * - Se valida que el texto no esté vacío.
- * - Se envía el texto al padre para ejecutar la búsqueda.
- */
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { fetchBooksByQuery } from "../api/booksApi";
 
 export default function SearchBarLibros({ onSearch }) {
-    // Estado que almacena el texto que el usuario escribe en la barra de búsqueda.
     const [query, setQuery] = useState("");
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
-    /**
-     * Maneja el envío del formulario.
-     * Se valida que el texto tenga contenido útil.
-     * Si es válido, se llama a la función de búsqueda entregada por el padre.
-     */
+    // Autocompletar libros mientras escribe
+    useEffect(() => {
+        if (query.trim().length < 2) {
+            setSuggestions([]);
+            return;
+        }
+
+        const delay = setTimeout(async () => {
+            const result = await fetchBooksByQuery(query.trim());
+
+            // Extraer títulos únicos
+            const seen = new Set();
+            const unique = [];
+
+            result.forEach((item) => {
+                const book = item[0];
+                if (!book?.title) return;
+
+                const t = book.title.trim();
+                if (!seen.has(t)) {
+                    seen.add(t);
+                    unique.push(book);
+                }
+            });
+
+            setSuggestions(unique.slice(0, 8)); // máx 8 sugerencias
+        }, 200);
+
+        return () => clearTimeout(delay);
+    }, [query]);
+
     const handleSubmit = (e) => {
-        e.preventDefault(); // Evita recargar la página
-        if (!query.trim()) return; // Evita búsquedas vacías
-        onSearch(query.trim()); // Envía el texto limpio al componente padre
+        e.preventDefault();
+        if (!query.trim()) return;
+        onSearch(query.trim());
+        setShowSuggestions(false);
+    };
+
+    const handleSelect = (title) => {
+        setQuery(title);
+        setShowSuggestions(false);
+        onSearch(title);
     };
 
     return (
-        // Formulario principal con estilos uniformes
-        <form onSubmit={handleSubmit} style={styles.form}>
+        <div style={{ position: "relative", width: "100%" }}>
+            <form onSubmit={handleSubmit} style={styles.form}>
+                <input
+                    type="text"
+                    placeholder="Buscar libros..."
+                    value={query}
+                    onChange={(e) => {
+                        setQuery(e.target.value);
+                        setShowSuggestions(true);
+                    }}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                    onFocus={() => query.length >= 2 && setShowSuggestions(true)}
+                    style={styles.input}
+                />
 
-            {/* Campo de texto para escribir la búsqueda */}
-            <input
-                type="text"
-                placeholder="Buscar libros..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                style={styles.input}
-            />
+                <button type="submit" style={styles.button}>
+                    Buscar
+                </button>
+            </form>
 
-            {/* Botón para ejecutar la búsqueda */}
-            <button type="submit" style={styles.button}>
-                Buscar
-            </button>
-        </form>
+            {/* Dropdown de sugerencias */}
+            {showSuggestions && suggestions.length > 0 && (
+                <div style={styles.dropdown}>
+                    {suggestions.map((b, i) => (
+                        <div
+                            key={i}
+                            style={styles.dropdownItem}
+                            onMouseDown={() => handleSelect(b.title)}
+                        >
+                            {b.title}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }
 
-/**
- * Estilos minimalistas y consistentes usados en todo el componente.
- * Se usan colores oscuros, bordes suaves y una tipografía uniforme.
- * El objetivo es mantener un diseño limpio y fácil de leer.
- */
 const styles = {
-    // Estilo general del formulario
     form: {
         display: "flex",
-        gap: 10,
-        marginBottom: 16,
+        gap: 12,
+        marginBottom: 18,
         width: "100%",
+        backgroundColor: "#141414",
+        padding: 12,
+        borderRadius: 14,
+        border: "1px solid #282828",
+        boxShadow: "0 0 10px rgba(0,0,0,0.25)",
     },
 
-    // Estilo del campo de texto
     input: {
         flex: 1,
         padding: "12px 14px",
-        borderRadius: 8,
-        border: "1px solid #555",
-        backgroundColor: "#111",
+        borderRadius: 10,
+        border: "1px solid #333",
+        backgroundColor: "#0d0d0d",
         color: "#fff",
         fontSize: 16,
         outline: "none",
+        transition: "border-color 0.18s ease, box-shadow 0.18s ease",
     },
 
-    // Estilo del botón de búsqueda
     button: {
-        padding: "12px 20px",
+        padding: "12px 22px",
         backgroundColor: "#ff3168",
         border: "none",
-        borderRadius: 8,
+        borderRadius: 10,
         color: "#fff",
         cursor: "pointer",
         fontSize: 16,
         fontWeight: 600,
-        transition: "opacity 0.2s ease",
+        transition: "transform 0.18s ease, opacity 0.18s ease",
+    },
+
+    dropdown: {
+        position: "absolute",
+        top: 70,
+        left: 0,
+        width: "100%",
+        backgroundColor: "#1c1c1c",
+        border: "1px solid #333",
+        borderRadius: 10,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.35)",
+        zIndex: 10,
+        maxHeight: 260,
+        overflowY: "auto",
+    },
+
+    dropdownItem: {
+        padding: "10px 14px",
+        color: "#fff",
+        cursor: "pointer",
+        borderBottom: "1px solid #2a2a2a",
+        transition: "background-color 0.15s ease",
     },
 };

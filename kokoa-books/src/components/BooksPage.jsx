@@ -1,6 +1,4 @@
-// Página principal que muestra buscadores, resultados y favoritos.
-// Organiza el diseño en dos columnas: libros a la izquierda y favoritos a la derecha.
-
+// src/components/BooksPage.jsx
 import { useState } from "react";
 
 import { fetchBooksByQuery, fetchBooksByAuthorId } from "../api/booksApi";
@@ -11,33 +9,26 @@ import useFavorites from "../hooks/useFavorites";
 import SearchBarLibros from "./SearchBarLibros";
 import SearchBarAutores from "./SearchBarAutores";
 import BookItem from "./BookItem";
+import BookDetailModal from "./BookDetailModal";
 
-/**
- * Esta página controla las búsquedas de libros y autores
- * y muestra los resultados junto con los favoritos.
- *
- * La interfaz se divide en dos columnas:
- * - Columna izquierda: resultados
- * - Columna derecha: favoritos con scroll
- */
 export default function BooksPage() {
-    // Lista de libros encontrados en una búsqueda
     const [books, setBooks] = useState([]);
-
-    // Hook personalizado que maneja favoritos
     const { favorites, toggleFavorite, isFavorite } = useFavorites();
+    const [selectedBookId, setSelectedBookId] = useState(null);
 
-    /**
-     * Maneja búsqueda por texto
-     */
+    function openBookModal(id) {
+        setSelectedBookId(id);
+    }
+
+    function closeBookModal() {
+        setSelectedBookId(null);
+    }
+
     async function handleSearchBooks(query) {
         const result = await fetchBooksByQuery(query);
         setBooks(result);
     }
 
-    /**
-     * Maneja búsqueda basada en un autor encontrado por nombre
-     */
     async function handleSearchAuthors(name) {
         const authors = await searchAuthors(name);
 
@@ -53,18 +44,14 @@ export default function BooksPage() {
 
     return (
         <div style={styles.pageContainer}>
-            {/* Título principal */}
             <h1 style={styles.title}>Buscador de Libros</h1>
 
-            {/* Contenedor de formularios de búsqueda */}
             <div style={styles.searchArea}>
                 <SearchBarLibros onSearch={handleSearchBooks} />
                 <SearchBarAutores onSearch={handleSearchAuthors} />
             </div>
 
-            {/* Contenedor general tipo dos columnas */}
             <div style={styles.columns}>
-                {/* Columna izquierda: resultados */}
                 <div style={styles.leftColumn}>
                     <h2 style={styles.subtitle}>Resultados</h2>
 
@@ -75,16 +62,15 @@ export default function BooksPage() {
                                 book={b[0]}
                                 isFavorite={isFavorite(b[0].id)}
                                 toggleFavorite={() => toggleFavorite(b[0])}
+                                onOpen={() => openBookModal(b[0].id)}
                             />
                         ))}
                     </div>
                 </div>
 
-                {/* Columna derecha: favoritos */}
                 <div style={styles.rightColumn}>
                     <h2 style={styles.subtitle}>Favoritos ⭐</h2>
 
-                    {/* Lista deslizable */}
                     <div style={styles.favoritesScroll}>
                         {favorites.map((b, i) => (
                             <BookItem
@@ -92,24 +78,29 @@ export default function BooksPage() {
                                 book={b}
                                 isFavorite={true}
                                 toggleFavorite={() => toggleFavorite(b)}
+                                onOpen={() => openBookModal(b.id)}
                             />
                         ))}
                     </div>
                 </div>
             </div>
+
+            {selectedBookId && (
+                <BookDetailModal
+                    bookId={selectedBookId}
+                    onClose={closeBookModal}
+                    toggleFavorite={toggleFavorite}
+                    isFavorite={isFavorite}
+                />
+            )}
         </div>
     );
 }
 
-/**
- * Estilos visuales modernos, limpios y equilibrados.
- * El diseño usa tipografía uniforme, columnas fluidas
- * y una sección de favoritos elegante con scroll vertical.
- */
 const styles = {
     pageContainer: {
         padding: 20,
-        color: "#fff",
+        color: "#ffffff",
         fontFamily: "system-ui, sans-serif",
         maxWidth: 1300,
         margin: "0 auto",
@@ -117,63 +108,70 @@ const styles = {
 
     title: {
         textAlign: "center",
-        marginBottom: 20,
+        marginBottom: 26,
         fontWeight: 700,
+        fontSize: 32,
+        letterSpacing: 0.5,
+        color: "#f5f5f5",
+        textShadow: "0 2px 8px rgba(0,0,0,0.5)",
     },
 
     searchArea: {
         display: "flex",
         flexDirection: "column",
-        gap: 12,
-        marginBottom: 25,
+        gap: 14,
+        marginBottom: 30,
+        backgroundColor: "#1c1c1c",
+        padding: 18,
+        borderRadius: 14,
+        border: "1px solid #2d2d2d",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
     },
 
-    // Distribuye dos columnas de manera limpia
     columns: {
         display: "flex",
         gap: 30,
         alignItems: "flex-start",
     },
 
-    // Columna izquierda (resultados)
     leftColumn: {
         flex: 2,
-        backgroundColor: "#1b1b1b",
-        padding: 16,
-        borderRadius: 12,
-        border: "1px solid #2d2d2d",
-        minHeight: 400,
-    },
-
-    // Columna derecha (favoritos)
-    rightColumn: {
-        flex: 1.2, // Se hace un poco más ancha que antes
-        backgroundColor: "#1b1b1b",
+        backgroundColor: "#141414",
         padding: 18,
         borderRadius: 14,
-        border: "1px solid #2d2d2d",
-        height: 700, // ALTURA MÁS GRANDE
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: "0 0 15px rgba(0,0,0,0.35)", // Hace que se vea más destacada
+        border: "1px solid #2a2a2a",
+        minHeight: 400,
+        boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
+        transition: "background-color 0.2s ease",
     },
 
+    rightColumn: {
+        flex: 1.2,
+        backgroundColor: "#141414",
+        padding: 18,
+        borderRadius: 14,
+        border: "1px solid #2a2a2a",
+        height: 700,
+        display: "flex",
+        flexDirection: "column",
+        boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
+        transition: "background-color 0.2s ease",
+    },
 
     subtitle: {
         marginTop: 0,
-        marginBottom: 12,
+        marginBottom: 14,
         fontSize: 20,
         fontWeight: 600,
         color: "#ffffff",
+        letterSpacing: 0.3,
     },
 
-    // Área scrollable para los favoritos
     favoritesScroll: {
         overflowY: "auto",
         paddingRight: 10,
         paddingBottom: 12,
         scrollbarWidth: "thin",
-        scrollbarColor: "#888 #1b1b1b",
+        scrollbarColor: "#444 #1b1b1b",
     },
-
 };
