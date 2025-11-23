@@ -1,33 +1,33 @@
-// /src/api/booksApi.js
+// src/api/booksApi.js
 import axios from "axios";
-import { normalizeBook } from "../utils/normalizeBook";
 
-// Clave secreta para acceder a la API
-const API_KEY = "dbd6c1ca3f3f4eecb969c4c8fcfd9323";
-// Dirección base de la API
-const BASE_URL = "https://api.bigbookapi.com/search-books";
+const BASE_URL = "https://api.bigbookapi.com";
+const API_KEY = import.meta.env.VITE_BIGBOOK_API_KEY;
 
-export async function fetchBooks(query) {
-    // Evita buscar si la entrada está vacía
-    if (!query || query.trim().length === 0) return [];
-
+// Buscar libros normal (por query)
+export async function fetchBooksByQuery(query) {
     try {
-        // Petición GET a la API con el texto de búsqueda
-        const res = await axios.get(`${BASE_URL}?query=${encodeURIComponent(query)}`, {
-            headers: {
-                Accept: "application/json", // Pedimos la respuesta en JSON
-                "X-API-Key": API_KEY,       // Clave personal para autenticar la solicitud
-            },
-        });
+        const url = `${BASE_URL}/search-books?query=${encodeURIComponent(query)}&api-key=${API_KEY}`;
+        const res = await axios.get(url);
 
-        // Extrae los libros, o un array vacío si no hay resultados
-        const rawBooks = res.data?.books || [];
+        console.log("LIBROS POR QUERY:", res.data);
+        return res.data.books || [];
+    } catch (e) {
+        console.error("Error buscando libros por query:", e);
+        return [];
+    }
+}
 
-        // Normaliza cada libro para tener el mismo formato
-        const books = rawBooks.map(normalizeBook);
-        return books;
-    } catch (err) {
-        // Si algo falla, el error se envía al componente que llamó a esta función
-        throw err;
+// Buscar libros por autor (por ID)
+export async function fetchBooksByAuthorId(authorId) {
+    try {
+        const url = `${BASE_URL}/search-books?authors=${authorId}&api-key=${API_KEY}`;
+        const res = await axios.get(url);
+
+        console.log("LIBROS POR AUTOR:", res.data);
+        return res.data.books || [];
+    } catch (e) {
+        console.error("Error buscando libros por autor:", e);
+        return [];
     }
 }

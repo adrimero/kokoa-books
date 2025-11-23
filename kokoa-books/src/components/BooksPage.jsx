@@ -1,97 +1,179 @@
-import React, { useState } from "react";
-import SearchBar from "./SearchBar";
+// Página principal que muestra buscadores, resultados y favoritos.
+// Organiza el diseño en dos columnas: libros a la izquierda y favoritos a la derecha.
+
+import { useState } from "react";
+
+import { fetchBooksByQuery, fetchBooksByAuthorId } from "../api/booksApi";
+import { searchAuthors } from "../api/authorsApi";
+
+import useFavorites from "../hooks/useFavorites";
+
+import SearchBarLibros from "./SearchBarLibros";
+import SearchBarAutores from "./SearchBarAutores";
 import BookItem from "./BookItem";
-import { fetchBooks as apiFetchBooks } from "../api/booksApi";
 
+/**
+ * Esta página controla las búsquedas de libros y autores
+ * y muestra los resultados junto con los favoritos.
+ *
+ * La interfaz se divide en dos columnas:
+ * - Columna izquierda: resultados
+ * - Columna derecha: favoritos con scroll
+ */
 export default function BooksPage() {
-    // Guarda los libros que llegan del API, setResults actualiza este array.
-    const [results, setResults] = useState([]);
-    // Indica si la búsqueda está en curso. Se activa antes de la petición y se desactiva al terminar.
-    const [loading, setLoading] = useState(false);
-    // Guarda un mensaje de error. Si es null, significa que no hubo errores.
-    const [error, setError] = useState(null);
-    // Guarda el último texto buscado. Útil para mostrar mensajes o evitar repeticiones.
-    const [lastQuery, setLastQuery] = useState("");
+    // Lista de libros encontrados en una búsqueda
+    const [books, setBooks] = useState([]);
 
-    // Maneja todo el proceso de búsqueda
-    const handleSearch = async (query) => {
-        setError(null); // Limpia errores anteriores
+    // Hook personalizado que maneja favoritos
+    const { favorites, toggleFavorite, isFavorite } = useFavorites();
 
-        if (!query || query.length < 3) {
-            setError("Escribe al menos 3 caracteres para buscar.");
-            setResults([]);
+    /**
+     * Maneja búsqueda por texto
+     */
+    async function handleSearchBooks(query) {
+        const result = await fetchBooksByQuery(query);
+        setBooks(result);
+    }
+
+    /**
+     * Maneja búsqueda basada en un autor encontrado por nombre
+     */
+    async function handleSearchAuthors(name) {
+        const authors = await searchAuthors(name);
+
+        if (authors.length === 0) {
+            alert("No se encontró el autor");
             return;
         }
 
-        setLoading(true);
-        setResults([]); // Limpia resultados previos
-        try {
-            const books = await apiFetchBooks(query); // Llama al API
-            setResults(books); // Actualiza los resultados
-            setLastQuery(query);
-            if (!books || books.length === 0) {
-                setError(null); // Sin resultados, pero sin error
-            }
-        } catch (err) {
-            console.error("Error buscando libros:", err);
-            setError("Ocurrió un error al buscar. Intenta de nuevo.");
-            setResults([]);
-        } finally {
-            setLoading(false); // Finaliza el estado de carga
-        }
-    };
+        const id = authors[0].id;
+        const result = await fetchBooksByAuthorId(id);
+        setBooks(result);
+    }
 
     return (
-        <div style={styles.container}>
-            <h1 style={styles.title}>📚 Buscador de Libros</h1>
+        <div style={styles.pageContainer}>
+            {/* Título principal */}
+            <h1 style={styles.title}>Buscador de Libros</h1>
 
-            {/* Barra de búsqueda */}
-            <SearchBar onSearch={handleSearch} disabled={loading} />
+            {/* Contenedor de formularios de búsqueda */}
+            <div style={styles.searchArea}>
+                <SearchBarLibros onSearch={handleSearchBooks} />
+                <SearchBarAutores onSearch={handleSearchAuthors} />
+            </div>
 
-            {/* Estado de carga */}
-            {loading && <p style={styles.info}>Cargando resultados...</p>}
+            {/* Contenedor general tipo dos columnas */}
+            <div style={styles.columns}>
+                {/* Columna izquierda: resultados */}
+                <div style={styles.leftColumn}>
+                    <h2 style={styles.subtitle}>Resultados</h2>
 
-            {/* Mensaje de error */}
-            {error && <p style={styles.error}>{error}</p>}
+                    <div>
+                        {books.map((b, i) => (
+                            <BookItem
+                                key={i}
+                                book={b[0]}
+                                isFavorite={isFavorite(b[0].id)}
+                                toggleFavorite={() => toggleFavorite(b[0])}
+                            />
+                        ))}
+                    </div>
+                </div>
 
-            {/* Mensaje si no hay resultados */}
-            {!loading && !error && results.length === 0 && lastQuery && (
-                <p style={styles.info}>No se encontraron libros para "{lastQuery}".</p>
-            )}
+                {/* Columna derecha: favoritos */}
+                <div style={styles.rightColumn}>
+                    <h2 style={styles.subtitle}>Favoritos ⭐</h2>
 
-            {/* Lista de resultados */}
-            <div>
-                {results.map((b) => (
-                    <BookItem key={b.id} book={b} /> // Cada libro individual
-                ))}
+                    {/* Lista deslizable */}
+                    <div style={styles.favoritesScroll}>
+                        {favorites.map((b, i) => (
+                            <BookItem
+                                key={i}
+                                book={b}
+                                isFavorite={true}
+                                toggleFavorite={() => toggleFavorite(b)}
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
 }
 
-// 🎨 Estilo simple y centrado
+/**
+ * Estilos visuales modernos, limpios y equilibrados.
+ * El diseño usa tipografía uniforme, columnas fluidas
+ * y una sección de favoritos elegante con scroll vertical.
+ */
 const styles = {
-    container: {
-        maxWidth: 700,
-        margin: "0 auto",
-        padding: "20px",
+    pageContainer: {
+        padding: 20,
+        color: "#fff",
         fontFamily: "system-ui, sans-serif",
-        color: "#222",
+        maxWidth: 1300,
+        margin: "0 auto",
     },
+
     title: {
-        color: "white",
         textAlign: "center",
+        marginBottom: 20,
         fontWeight: 700,
-        marginBottom: "16px",
     },
-    info: {
-        textAlign: "center",
-        color: "#555",
-        margin: "8px 0",
+
+    searchArea: {
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        marginBottom: 25,
     },
-    error: {
-        textAlign: "center",
-        color: "crimson",
-        fontWeight: 500,
+
+    // Distribuye dos columnas de manera limpia
+    columns: {
+        display: "flex",
+        gap: 30,
+        alignItems: "flex-start",
     },
+
+    // Columna izquierda (resultados)
+    leftColumn: {
+        flex: 2,
+        backgroundColor: "#1b1b1b",
+        padding: 16,
+        borderRadius: 12,
+        border: "1px solid #2d2d2d",
+        minHeight: 400,
+    },
+
+    // Columna derecha (favoritos)
+    rightColumn: {
+        flex: 1.2, // Se hace un poco más ancha que antes
+        backgroundColor: "#1b1b1b",
+        padding: 18,
+        borderRadius: 14,
+        border: "1px solid #2d2d2d",
+        height: 700, // ALTURA MÁS GRANDE
+        display: "flex",
+        flexDirection: "column",
+        boxShadow: "0 0 15px rgba(0,0,0,0.35)", // Hace que se vea más destacada
+    },
+
+
+    subtitle: {
+        marginTop: 0,
+        marginBottom: 12,
+        fontSize: 20,
+        fontWeight: 600,
+        color: "#ffffff",
+    },
+
+    // Área scrollable para los favoritos
+    favoritesScroll: {
+        overflowY: "auto",
+        paddingRight: 10,
+        paddingBottom: 12,
+        scrollbarWidth: "thin",
+        scrollbarColor: "#888 #1b1b1b",
+    },
+
 };
