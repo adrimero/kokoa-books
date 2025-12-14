@@ -51,75 +51,75 @@ export default function BookItem({ book, isFavorite, toggleFavorite, onOpen, sma
 
 const styles = {
     card: {
-        backgroundColor: "#141414",
-        border: "1px solid #282828",
-        padding: 16,
-        borderRadius: 14,
-        marginBottom: 14,
-        color: "#ffffff",
-        fontFamily: "system-ui, sans-serif",
-        transition: "all 0.18s ease",
-        boxShadow: "0 0 12px rgba(0,0,0,0.25)",
+        background: "rgba(255,255,255,0.06)",
+        backdropFilter: "blur(14px)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        padding: 20,
+        borderRadius: 20,
+        marginBottom: 18,
+        color: "#fff",
+        boxShadow: "0 8px 25px rgba(0,0,0,0.35)",
+        transition: "transform 0.28s ease, box-shadow 0.28s ease",
     },
 
     smallCard: {
-        padding: 8,
-        marginBottom: 10,
-        borderRadius: 10,
+        padding: 12,
+        borderRadius: 16,
     },
 
     row: {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        gap: 14,
+        gap: 18,
+    },
+
+    image: {
+        width: 100,
+        borderRadius: 14,
+        objectFit: "cover",
+        cursor: "pointer",
+        transition: "0.25s",
+        boxShadow: "0 6px 18px rgba(0,0,0,0.45)",
+    },
+
+    smallImage: {
+        width: 55,
+        borderRadius: 10,
+        objectFit: "cover",
+        cursor: "pointer",
+        transition: "0.25s",
+        boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
     },
 
     infoColumn: {
         flex: 1,
-    },
-
-    image: {
-        width: 90,
-        height: "auto",
-        borderRadius: 10,
-        objectFit: "cover",
-        cursor: "pointer",
-        transition: "transform 0.18s ease, box-shadow 0.18s ease",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-    },
-
-    smallImage: {
-        width: 50,
-        borderRadius: 6,
-        cursor: "pointer",
-        objectFit: "cover",
-        transition: "transform 0.18s ease, box-shadow 0.18s ease",
-        boxShadow: "0 3px 8px rgba(0,0,0,0.35)",
+        display: "flex",
+        flexDirection: "column",
+        gap: 6,
     },
 
     title: {
-        fontSize: 18,
-        fontWeight: 600,
+        fontSize: 19,
+        fontWeight: 700,
+        color: "#fff",
         margin: 0,
-        marginBottom: 4,
-        color: "#ffffff",
-        letterSpacing: "0.3px",
     },
 
     text: {
-        margin: "3px 0",
-        fontSize: 14,
-        color: "#c9c9c9",
+        color: "#dcdcdc",
+        margin: "2px 0",
+        fontSize: 15,
     },
 
     favoriteButton: {
-        fontSize: 28,
+        fontSize: 30,
         cursor: "pointer",
         border: "none",
         background: "none",
-        color: "#ffdf57",
+        color: "#ffd95a",
         padding: 6,
-        transition: "transform 0.18s ease",
+        transition: "transform 0.25s ease, filter 0.25s",
     },
 };
+

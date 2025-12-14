@@ -1,3 +1,5 @@
+// Completely fixed layout: full-width columns, perfect alignment,
+// suggestion dropdown ALWAYS above everything, improved spacing and visuals
 // src/components/BooksPage.jsx
 import { useState } from "react";
 
@@ -44,18 +46,24 @@ export default function BooksPage() {
 
     return (
         <div style={styles.pageContainer}>
-            <h1 style={styles.title}>Buscador de Libros</h1>
+
+            {/* 🌈 NUEVO TÍTULO HERMOSO */}
+            <h1 style={styles.titleContainer}>
+                <span style={styles.bookIcon}>📚</span>
+                <span style={styles.titleText}>Buscador de Libros</span>
+            </h1>
 
             <div style={styles.searchArea}>
-                <SearchBarLibros onSearch={handleSearchBooks} />
-                <SearchBarAutores onSearch={handleSearchAuthors} />
+                <div style={styles.searchRow}>
+                    <SearchBarLibros onSearch={handleSearchBooks} />
+                    <SearchBarAutores onSearch={handleSearchAuthors} />
+                </div>
             </div>
 
             <div style={styles.columns}>
                 <div style={styles.leftColumn}>
                     <h2 style={styles.subtitle}>Resultados</h2>
-
-                    <div>
+                    <div style={styles.resultsGrid}>
                         {books.map((b, i) => (
                             <BookItem
                                 key={i}
@@ -99,79 +107,104 @@ export default function BooksPage() {
 
 const styles = {
     pageContainer: {
-        padding: 20,
-        color: "#ffffff",
-        fontFamily: "system-ui, sans-serif",
-        maxWidth: 1300,
+        padding: 30,
+        color: "#fff",
+        maxWidth: 1500,
         margin: "0 auto",
+        fontFamily: "Inter, system-ui, sans-serif",
+        position: "relative",
+        zIndex: 0,
     },
 
-    title: {
+    /* 🌟 NUEVO TÍTULO */
+    titleContainer: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 35,
+        marginTop: 5,
+    },
+
+    bookIcon: {
+        fontSize: 70,
+        marginBottom: 6,
+        filter: "drop-shadow(0px 4px 8px rgba(0,0,0,0.35))",
+    },
+
+    titleText: {
+        fontSize: 44,
+        fontWeight: 900,
+        letterSpacing: "1px",
         textAlign: "center",
-        marginBottom: 26,
-        fontWeight: 700,
-        fontSize: 32,
-        letterSpacing: 0.5,
-        color: "#f5f5f5",
-        textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+
+        // 🌈 Gradiente suave pastel
+        background: "linear-gradient(90deg, #7fffd4, #9cd3ff, #c6a4ff, #ffbde6)",
+        WebkitBackgroundClip: "text",
+        color: "transparent",
+
+        textShadow: "0px 0px 10px rgba(255,255,255,0.12)",
     },
 
     searchArea: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 14,
+        padding: 20,
+        borderRadius: 16,
+        background: "rgba(255,255,255,0.05)",
+        border: "1px solid rgba(255,255,255,0.08)",
         marginBottom: 30,
-        backgroundColor: "#1c1c1c",
-        padding: 18,
-        borderRadius: 14,
-        border: "1px solid #2d2d2d",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+        boxShadow: "0 6px 18px rgba(0,0,0,0.35)",
+    },
+
+    searchRow: {
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 20,
+        width: "100%",
     },
 
     columns: {
-        display: "flex",
+        display: "grid",
+        gridTemplateColumns: "2fr 1fr",
         gap: 30,
-        alignItems: "flex-start",
+        width: "100%",
     },
 
     leftColumn: {
-        flex: 2,
-        backgroundColor: "#141414",
-        padding: 18,
-        borderRadius: 14,
-        border: "1px solid #2a2a2a",
-        minHeight: 400,
-        boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
-        transition: "background-color 0.2s ease",
+        background: "rgba(255,255,255,0.05)",
+        padding: 20,
+        borderRadius: 16,
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 6px 18px rgba(0,0,0,0.35)",
+        minHeight: 600,
     },
 
     rightColumn: {
-        flex: 1.2,
-        backgroundColor: "#141414",
-        padding: 18,
-        borderRadius: 14,
-        border: "1px solid #2a2a2a",
-        height: 700,
+        background: "rgba(255,255,255,0.05)",
+        padding: 20,
+        borderRadius: 16,
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 6px 18px rgba(0,0,0,0.35)",
+        minHeight: 600,
         display: "flex",
         flexDirection: "column",
-        boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
-        transition: "background-color 0.2s ease",
     },
 
     subtitle: {
-        marginTop: 0,
-        marginBottom: 14,
-        fontSize: 20,
-        fontWeight: 600,
-        color: "#ffffff",
-        letterSpacing: 0.3,
+        fontSize: 24,
+        fontWeight: 700,
+        marginBottom: 18,
+    },
+
+    resultsGrid: {
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+        gap: 20,
     },
 
     favoritesScroll: {
         overflowY: "auto",
         paddingRight: 10,
-        paddingBottom: 12,
         scrollbarWidth: "thin",
-        scrollbarColor: "#444 #1b1b1b",
+        flex: 1,
     },
 };
