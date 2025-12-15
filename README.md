@@ -1,31 +1,114 @@
-# kokoa-books
-Aplicación React para buscar y explorar libros de manera sencilla.
+# 📚 Buscador de Libros — BigBook API
 
-## Objetivo
-Aprender a usar React para conectarse a una API, mostrar información y manejar estados como carga o error, mientras se construye una interfaz interactiva.
+Aplicación web hecha con **React + Vite** que permite buscar libros y autores usando la **BigBook API**, ver el detalle completo de un libro en un modal y guardar libros como **favoritos** usando `localStorage`.
 
-## Tecnologías
-- React  
-- Vite  
-- Axios  
+---
 
-## Big Book API
-La aplicación se conecta a la **Big Book API** para buscar libros.  
-Se envía una API Key para obtener los datos de forma segura.
+## 0️⃣ **Características**
 
-**Headers usados:**  
-- Accept: application/json  
-- X-API-Key: dbd6c1ca3f3f4eecb969c4c8fcfd9323
+- 🔍 Buscar libros por título
+- 🧑‍💼 Buscar libros por autor
+- ✨ Autocompletado mientras se escribe
+- 📖 Modal con información completa del libro
+- ⭐ Agregar / quitar libros de favoritos
+- 💾 Favoritos persistentes con `localStorage`
+- 🎨 Interfaz moderna con estilos CSS-in-JS
 
-## Cómo funciona
-- El usuario escribe un término de búsqueda y obtiene resultados en tiempo real.  
-- Cada libro muestra título, autores y portada.  
-- Se manejan mensajes de carga y error.  
+---
 
-## Componentes principales
-- **SearchBar:** barra para escribir y buscar libros.  
-- **BooksPage:** gestiona los resultados y estados.  
-- **BookItem:** muestra la información de cada libro.  
+## 1️⃣ **Tecnologías**
 
-## Resultado esperado
-Una app funcional y fácil de usar que permite explorar libros de la API directamente desde el navegador.
+- **React**
+- **Vite**
+- **Axios**
+- **JavaScript**
+- **BigBook API**
+- **CSS-in-JS**
+- **LocalStorage**
+
+---
+
+## 2️⃣ **Estructura del proyecto**
+
+```text
+src/
+├── api/
+│   ├── authorsApi.js
+│   ├── booksApi.js
+│   └── bookDetailsApi.js
+├── components/
+│   ├── BooksPage.jsx
+│   ├── BookItem.jsx
+│   ├── BookDetailModal.jsx
+│   ├── SearchBarLibros.jsx
+│   └── SearchBarAutores.jsx
+├── hooks/
+│   └── useFavorites.js
+└── utils/
+    └── normalizeBook.js
+````
+
+---
+
+## 3️⃣ **Configuración**
+
+Crear un archivo `.env` en la raíz del proyecto:
+
+```env
+VITE_BIGBOOK_API_KEY=TU_API_KEY_AQUI
+```
+
+---
+
+## 4️⃣ **Descripción rápida de módulos**
+
+### **API**
+
+* `authorsApi.js` → Busca autores por nombre
+* `booksApi.js` → Busca libros por texto o por autor
+* `bookDetailsApi.js` → Obtiene información completa de un libro
+
+### **Componentes**
+
+* `BooksPage.jsx` → Página principal
+* `BookItem.jsx` → Tarjeta de libro
+* `BookDetailModal.jsx` → Modal de detalles
+* `SearchBarLibros.jsx` → Buscador de libros
+* `SearchBarAutores.jsx` → Buscador de autores
+
+### **Hook**
+
+* `useFavorites.js` → Manejo de favoritos con `localStorage`
+
+---
+
+## 5️⃣ **Ejecución**
+
+Instalar dependencias:
+
+```bash
+npm install
+```
+
+Ejecutar el proyecto:
+
+```bash
+npm run dev
+```
+
+Abrir en el navegador:
+
+```text
+http://localhost:5173
+```
+
+---
+
+## 6️⃣ **Notas**
+
+* El autocompletado usa debounce para no saturar la API
+* Los favoritos se guardan automáticamente
+* No requiere backend
+
+---
+
